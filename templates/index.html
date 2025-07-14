@@ -1,356 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Resume Ranker</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      body {
-        font-family: "Inter", sans-serif;
-      }
-      .upload-area {
-        border: 2px dashed #cbd5e0;
-        transition: all 0.3s ease;
-        background: linear-gradient(145deg, #ffffff 0%, #f7fafc 100%);
-      }
-      .upload-area:hover {
-        border-color: #4299e1;
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      }
-      .progress-ring {
-        transition: stroke-dashoffset 1s ease-in-out;
-        transform: rotate(-90deg);
-        transform-origin: 50% 50%;
-      }
-      .animate-fade-in {
-        animation: fadeIn 0.5s ease-in;
-      }
-      .animate-slide-up {
-        animation: slideUp 0.5s ease-out;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
+        body {
+            background: linear-gradient(135deg, #1a1c2e 0%, #283593 100%);
+            min-height: 100vh;
+            color: #fff;
         }
-        to {
-          opacity: 1;
+
+        .container-wrapper {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-      }
-      @keyframes slideUp {
-        from {
-          transform: translateY(20px);
-          opacity: 0;
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
-        to {
-          transform: translateY(0);
-          opacity: 1;
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-      }
-      .glass-effect {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-      }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-area {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(79, 70, 229, 0.4);
+        }
+
+        .text-gradient-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.6s ease forwards;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        textarea {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        textarea:focus {
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .skill-tag {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .skill-tag:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
     </style>
-  </head>
-  <body
-    class="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen"
-  >
-    <div class="py-12 px-4 sm:px-6 lg:px-8 animate-fade-in">
-      <div class="max-w-4xl mx-auto">
-        <div class="text-center mb-12 animate-slide-up">
-          <h1
-            class="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4"
-          >
-            Mechatronics-AI Resume Ranker
-          </h1>
-          <p class="text-xl text-gray-600">
-            Upload your resume and let AI match you with your dream job
-          </p>
-        </div>
-
-        <div
-          class="glass-effect shadow-xl rounded-2xl p-8 mb-8 animate-slide-up"
-          style="transition: all 0.3s ease"
-        >
-          <form id="uploadForm" class="space-y-8">
-            <div>
-              <label class="block text-lg font-semibold text-gray-700 mb-3"
-                >Upload Resume</label
-              >
-              <div
-                class="upload-area p-8 text-center cursor-pointer rounded-xl hover:bg-blue-50 transition-all duration-300"
-              >
-                <input
-                  type="file"
-                  id="resume"
-                  name="resume"
-                  accept=".pdf,.docx"
-                  class="hidden"
-                />
-                <div class="space-y-3">
-                  <div
-                    class="w-20 h-20 mx-auto bg-blue-100 rounded-full flex items-center justify-center"
-                  >
-                    <svg
-                      class="w-10 h-10 text-blue-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      ></path>
-                    </svg>
-                  </div>
-                  <div class="text-lg font-medium text-gray-700" id="fileName">
-                    Drop your resume here or click to upload
-                  </div>
-                  <div class="text-sm text-gray-500">
-                    .pdf or .docx files only
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label
-                for="jobDescription"
-                class="block text-lg font-semibold text-gray-700 mb-3"
-                >Job Description</label
-              >
-              <textarea
-                id="jobDescription"
-                name="jobDescription"
-                rows="6"
-                class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition duration-200 resize-none"
-                placeholder="Paste the job description here..."
-              ></textarea>
-            </div>
-
-            <div class="flex justify-center">
-              <button
-                type="submit"
-                class="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Analyze Resume
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <div
-          id="results"
-          class="hidden glass-effect shadow-xl rounded-2xl p-8 animate-fade-in"
-        >
-          <div class="text-center mb-10">
-            <div class="relative inline-block">
-              <svg class="w-40 h-40">
-                <circle
-                  class="text-gray-200"
-                  stroke-width="10"
-                  stroke="currentColor"
-                  fill="transparent"
-                  r="60"
-                  cx="80"
-                  cy="80"
-                />
-                <circle
-                  class="progress-ring text-blue-600"
-                  stroke-width="10"
-                  stroke="currentColor"
-                  fill="transparent"
-                  r="60"
-                  cx="80"
-                  cy="80"
-                />
-              </svg>
-              <div class="absolute inset-0 flex items-center justify-center">
-                <span
-                  id="scoreValue"
-                  class="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
-                  >0%</span
-                >
-              </div>
-            </div>
-            <h2 class="mt-6 text-3xl font-bold text-gray-800">Match Score</h2>
-          </div>
-
-          <div class="space-y-8">
-            <div
-              class="bg-white rounded-xl p-6 shadow-md transition-all duration-300 hover:shadow-lg"
-            >
-              <h3 class="text-xl font-semibold text-gray-800 mb-4">
-                Matching Skills
-              </h3>
-              <div id="matchingSkills" class="flex flex-wrap gap-2"></div>
-            </div>
-
-            <div
-              class="bg-white rounded-xl p-6 shadow-md transition-all duration-300 hover:shadow-lg"
-            >
-              <h3 class="text-xl font-semibold text-gray-800 mb-4">
-                Missing Skills
-              </h3>
-              <div id="missingSkills" class="flex flex-wrap gap-2"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <h3
-        class="text-center text-lg text-gray-600 mt-8"
-        style="margin-bottom: 15px"
-      >
-        By Vignesh.S
-      </h3>
+</head>
+<body class="min-h-screen py-8 px-4">
+  <div class="container-wrapper max-w-4xl mx-auto p-8 rounded-2xl">
+    <div class="text-center mb-12 animate-slide-up">
+      <h1 class="text-5xl font-bold text-white mb-4 animate-fade-in">
+        AI Resume Ranker
+      </h1>
+      <p class="text-xl text-gray-200 animate-fade-in" style="animation-delay: 200ms">
+        Upload your resume and let AI match you with your dream job
+      </p>
     </div>
 
-    <script>
-      // Handle file upload UI
-      const uploadArea = document.querySelector(".upload-area");
-      const fileInput = document.querySelector("#resume");
-      const fileNameDisplay = document.querySelector("#fileName");
+    <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up" style="animation-delay: 400ms">
+      <form id="uploadForm" class="space-y-8">
+        <div>
+          <label class="block text-lg font-semibold text-white mb-3">Upload Resume</label>
+          <div class="upload-area p-8 text-center cursor-pointer rounded-xl">
+            <input type="file" id="resume" name="resume" accept=".pdf,.docx" class="hidden" />
+            <div class="space-y-4">
+              <div class="w-20 h-20 mx-auto bg-opacity-20 bg-white rounded-full flex items-center justify-center">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+              <div class="text-lg font-medium text-white" id="fileName">
+                Drop your resume here or click to upload
+              </div>
+              <div class="text-sm text-gray-300">
+                .pdf or .docx files only
+              </div>
+            </div>
+          </div>
+        </div>
 
-      uploadArea.addEventListener("click", () => fileInput.click());
-      uploadArea.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        uploadArea.classList.add("border-blue-500", "bg-blue-50");
-      });
-      uploadArea.addEventListener("dragleave", () => {
-        uploadArea.classList.remove("border-blue-500", "bg-blue-50");
-      });
-      uploadArea.addEventListener("drop", (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove("border-blue-500", "bg-blue-50");
-        fileInput.files = e.dataTransfer.files;
-        updateFileName();
-      });
-      fileInput.addEventListener("change", updateFileName);
+        <div>
+          <label for="jobDescription" class="block text-lg font-semibold text-white mb-3">Job Description</label>
+          <textarea id="jobDescription" name="jobDescription" rows="6" class="w-full px-4 py-3 rounded-xl focus:ring focus:ring-purple-500 transition duration-200 resize-none" placeholder="Paste the job description here..."></textarea>
+        </div>
 
-      function updateFileName() {
-        const file = fileInput.files[0];
-        fileNameDisplay.textContent = file
-          ? file.name
-          : "Drop your resume here or click to upload";
-        if (file) {
-          fileNameDisplay.classList.add("text-blue-600");
-        } else {
-          fileNameDisplay.classList.remove("text-blue-600");
-        }
+        <div class="flex justify-center">
+          <button type="submit" class="btn-primary px-8 py-4 text-white text-lg font-semibold rounded-xl">
+            Analyze Resume
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div id="results" class="hidden glass-effect rounded-2xl p-8 animate-fade-in space-y-8">
+      <div class="text-center mb-12">
+        <div class="relative inline-block">
+          <div class="w-40 h-40 relative">
+            <svg class="w-full h-full transform -rotate-90">
+              <circle class="text-gray-700" stroke-width="8" stroke="currentColor" fill="transparent" r="70" cx="80" cy="80"/>
+              <circle class="progress-ring text-gradient-primary" stroke-width="8" stroke="currentColor" fill="transparent" r="70" cx="80" cy="80" stroke-dasharray="439.82" stroke-dashoffset="439.82"/>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span id="scoreValue" class="text-5xl font-bold text-white glow-text">0%</span>
+            </div>
+          </div>
+          <h2 class="mt-6 text-3xl font-bold text-white glow-text">Match Score</h2>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="glass-card p-6 rounded-xl">
+          <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Matching Skills
+          </h3>
+          <div id="matchingSkills" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl">
+          <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            Missing Skills
+          </h3>
+          <div id="missingSkills" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+<script>
+  // Handle file upload UI
+  const uploadArea = document.querySelector('.upload-area');
+  const fileInput = document.querySelector('#resume');
+  const fileName = document.querySelector('#fileName');
+
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('bg-opacity-20');
+  });
+
+  uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('bg-opacity-20');
+  });
+
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('bg-opacity-20');
+    const file = e.dataTransfer.files[0];
+    handleFile(file);
+  });
+
+  uploadArea.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    handleFile(file);
+  });
+
+  function handleFile(file) {
+    if (file) {
+      fileName.textContent = file.name;
+      uploadArea.classList.add('border-purple-400');
+    }
+  }
+
+  // Handle form submission
+  const form = document.querySelector('#uploadForm');
+  const results = document.querySelector('#results');
+  const progressRing = document.querySelector('.progress-ring');
+  const scoreValue = document.querySelector('#scoreValue');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch('/analyze', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+      showResults(data);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  });
+
+  function showResults(data) {
+    results.classList.remove('hidden');
+    results.classList.add('animate-fade-in');
+
+    // Animate score
+    const score = Math.round(data.score); // Changed from data.similarity_score to data.score
+    const duration = 1500;
+    const steps = 60;
+    const increment = score / steps;
+    let currentScore = 0;
+    const circumference = 2 * Math.PI * 70; // r = 70
+    progressRing.style.strokeDasharray = `${circumference} ${circumference}`;
+
+    const interval = setInterval(() => {
+      currentScore = Math.min(currentScore + increment, score);
+      scoreValue.textContent = `${Math.round(currentScore)}%`;
+      const offset = circumference - (currentScore / 100) * circumference;
+      progressRing.style.strokeDashoffset = offset;
+
+      if (currentScore >= score) {
+        clearInterval(interval);
       }
+    }, duration / steps);
 
-      // Handle form submission
-      document
-        .getElementById("uploadForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const formData = new FormData();
-          formData.append("resume", fileInput.files[0]);
-          formData.append(
-            "jobDescription",
-            document.getElementById("jobDescription").value
-          );
+    // Display skills
+    const matchingSkills = document.querySelector('#matchingSkills');
+    const missingSkills = document.querySelector('#missingSkills');
 
-          try {
-            const submitButton = e.target.querySelector(
-              'button[type="submit"]'
-            );
-            submitButton.disabled = true;
-            submitButton.innerHTML =
-              '<span class="animate-pulse">Analyzing...</span>';
+    matchingSkills.innerHTML = '';
+    missingSkills.innerHTML = '';
 
-            const response = await fetch("/analyze", {
-              method: "POST",
-              body: formData,
-            });
+    data.matching_skills.forEach((skill, index) => {
+      const skillTag = createSkillTag(skill, 'text-green-400', index);
+      matchingSkills.appendChild(skillTag);
+    });
 
-            if (!response.ok) throw new Error("Analysis failed");
+    data.missing_skills.forEach((skill, index) => {
+      const skillTag = createSkillTag(skill, 'text-yellow-400', index);
+      missingSkills.appendChild(skillTag);
+    });
+  }
 
-            const data = await response.json();
-            displayResults(data);
-          } catch (error) {
-            alert("Error analyzing resume: " + error.message);
-          } finally {
-            const submitButton = e.target.querySelector(
-              'button[type="submit"]'
-            );
-            submitButton.disabled = false;
-            submitButton.innerHTML = "Analyze Resume";
-          }
-        });
-
-      function displayResults(data) {
-        // Show results section with animation
-        const results = document.getElementById("results");
-        results.classList.remove("hidden");
-        results.classList.add("animate-fade-in");
-
-        // Update score with animation
-        const score = data.score;
-        const scoreValue = document.getElementById("scoreValue");
-        const circle = document.querySelector(".progress-ring");
-        const radius = circle.r.baseVal.value;
-        const circumference = radius * 2 * Math.PI;
-        circle.style.strokeDasharray = `${circumference} ${circumference}`;
-
-        // Animate the score number
-        let currentScore = 0;
-        const duration = 1000; // 1 second animation
-        const increment = score / (duration / 16); // 60fps
-        const startTime = performance.now();
-
-        function updateScore(currentTime) {
-          const elapsed = currentTime - startTime;
-          if (elapsed < duration) {
-            currentScore = Math.min(score, currentScore + increment);
-            scoreValue.textContent = `${Math.round(currentScore)}%`;
-            circle.style.strokeDashoffset =
-              circumference - (currentScore / 100) * circumference;
-            requestAnimationFrame(updateScore);
-          } else {
-            scoreValue.textContent = `${score}%`;
-            circle.style.strokeDashoffset =
-              circumference - (score / 100) * circumference;
-          }
-        }
-        requestAnimationFrame(updateScore);
-
-        // Display skills with animation
-        const matchingSkillsDiv = document.getElementById("matchingSkills");
-        const missingSkillsDiv = document.getElementById("missingSkills");
-
-        matchingSkillsDiv.innerHTML = data.matching_skills
-          .map(
-            (skill, index) =>
-              `<span class="px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800 animate-fade-in" style="animation-delay: ${
-                index * 100
-              }ms">${skill}</span>`
-          )
-          .join("");
-
-        missingSkillsDiv.innerHTML = data.missing_skills
-          .map(
-            (skill, index) =>
-              `<span class="px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-800 animate-fade-in" style="animation-delay: ${
-                index * 100
-              }ms">${skill}</span>`
-          )
-          .join("");
-
-        // Smooth scroll to results
-        results.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }
-    </script>
-  </body>
+  function createSkillTag(skill, colorClass, index) {
+    const div = document.createElement('div');
+    div.className = `skill-tag ${colorClass}`;
+    div.style.animationDelay = `${index * 100}ms`;
+    div.textContent = skill;
+    return div;
+  }
+</script>
+</body>
 </html>
